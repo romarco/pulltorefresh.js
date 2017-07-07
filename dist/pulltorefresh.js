@@ -30,6 +30,8 @@ var _defaults = {
   refreshTimeout: 500,
   getMarkup: _ptrMarkup,
   getStyles: _ptrStyles,
+  scrollTopZero: false, //If true, pulling starts when scrollTop of the mainElement is equal to zero
+  pullDelay: 0, //Pulling starts if distance of finger movement > pullDelay
   onInit: function () {},
   onRefresh: function () { return location.reload(); },
   resistanceFunction: function (t) { return Math.min(1, t / 2.5); },
@@ -102,6 +104,12 @@ function _setupEvents() {
 
   function _onTouchStart(e) {
     var triggerElement = _SETTINGS.triggerElement;
+    var scrollTopZero = _SETTINGS.scrollTopZero;
+    
+    //Sometimes, we need to start the pulling only if a DIV scrolltop is equal to zero
+    if (scrollTopZero == true && _SETTINGS.mainElement.scrollTop >= 1){ 
+      return false; 
+    }
 
     if (!window.scrollY) {
       pullStartY = e.touches[0].screenY;
@@ -125,6 +133,13 @@ function _setupEvents() {
     var distThreshold = _SETTINGS.distThreshold;
     var cssProp = _SETTINGS.cssProp;
     var classPrefix = _SETTINGS.classPrefix;
+    var pullDelay = _SETTINGS.pullDelay;
+    var scrollTopZero = _SETTINGS.scrollTopZero;
+    
+    //Sometimes, we need to start the pulling only if a DIV scrolltop is equal to zero
+    if (scrollTopZero == true && _SETTINGS.mainElement.scrollTop >= 1){ 
+      return false; 
+    }
 
     if (!pullStartY) {
       if (!window.scrollY) {
@@ -151,7 +166,11 @@ function _setupEvents() {
     if (pullStartY && pullMoveY) {
       dist = pullMoveY - pullStartY;
     }
-
+    
+    //If we need the pulling starts when distance is equal to X
+    if (dist < pullDelay){
+      return false;
+    }
     if (dist > 0) {
       e.preventDefault();
 
